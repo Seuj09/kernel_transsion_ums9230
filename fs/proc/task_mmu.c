@@ -902,7 +902,7 @@ static void smap_gather_stats(struct vm_area_struct *vma,
 			mss->swap += shmem_swapped;
 		} else {
 			mss->check_shmem_swap = true;
-			walk_page_range(vma->vm_mm, vma->vm_start, end,
+			walk_page_range(vma->vm_mm, start ? start : vma->vm_start, end,
 					&smaps_shmem_walk_ops, mss);
 			return;
 		}
