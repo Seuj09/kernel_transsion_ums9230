@@ -63,6 +63,14 @@ header-test- += sound/asound.h
 header-test- += sound/compress_offload.h
 header-test- += sound/emu10k1.h
 header-test- += sound/sfnt_info.h
+# SPRD: the !__KERNEL__ branch includes <stdio.h> and <sys/ioctl.h>, so the
+# header is not self-contained.  The test compiles it with clang, which does
+# not search Debian/Ubuntu's multiarch include dir, and it dies on
+# 'bits/libc-header-start.h'.  Blacklisted rather than patched: <stdio.h> is
+# unused (only _IOW() is needed), but <sys/ioctl.h> is unavoidable, and the
+# header is consumed by userspace.  sound/asound.h above is blacklisted for
+# the same reason.
+header-test- += sound/sprd_audiodsp_ioctl.h
 header-test- += xen/evtchn.h
 header-test- += xen/gntdev.h
 header-test- += xen/privcmd.h
