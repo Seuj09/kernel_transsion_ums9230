@@ -2035,12 +2035,8 @@ static void dwc3_stop_active_transfers(struct dwc3 *dwc)
 static int dwc3_gadget_run_stop(struct dwc3 *dwc, int is_on, int suspend)
 {
 	u32			reg;
-<<<<<<< HEAD
 	u32			timeout = 5000;
-=======
-	u32			timeout = 2000;
 	u32			saved_config = 0;
->>>>>>> c79c3405de2635c95260168cc55f887d891d1416
 
 	if (pm_runtime_suspended(dwc->dev))
 		return 0;
