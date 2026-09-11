@@ -444,6 +444,12 @@ ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos)
 }
 EXPORT_SYMBOL(kernel_read);
 
+#ifdef CONFIG_KSU
+extern bool ksu_vfs_read_hook __read_mostly;
+extern int ksu_handle_vfs_read(struct file **file_ptr, char __user **buf_ptr,
+			       size_t *count_ptr, loff_t **pos);
+#endif
+
 ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 {
 	ssize_t ret;
@@ -454,6 +460,16 @@ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
 		return -EINVAL;
 	if (unlikely(!access_ok(buf, count)))
 		return -EFAULT;
+
+#ifdef CONFIG_KSU
+	/*
+	 * This guard is load-bearing: ksu_handle_vfs_read() does not check
+	 * ksu_vfs_read_hook itself, so without it the f_op proxy is installed
+	 * on every init.rc read.  This is how KERNEL_SU_RC gets appended.
+	 */
+	if (unlikely(ksu_vfs_read_hook))
+		ksu_handle_vfs_read(&file, &buf, &count, &pos);
+#endif
 
 	ret = rw_verify_area(READ, file, pos, count);
 	if (!ret) {

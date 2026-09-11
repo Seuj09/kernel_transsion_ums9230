@@ -1,0 +1,7 @@
+[submodule "KernelSU-Next"]
+	path = KernelSU-Next
+	url = https://github.com/rifsxd/KernelSU-Next
+	# Non-GKI branch: manual hooks, for kernels below 5.10.  The pinned commit
+	# (a54e4fa4) is what actually gets checked out -- this line only documents
+	# the intent and drives `git submodule update --remote`.
+	branch = legacy

@@ -5539,6 +5539,14 @@ CONFIG_SPRD_PROC_BOOTDEVICE=y
 CONFIG_SPRD_PROC_UFS=y
 CONFIG_SPRD_PROC_MMC=y
 
+#
+# KernelSU
+#
+CONFIG_KSU=y
+# CONFIG_KSU_DEBUG is not set
+CONFIG_KSU_MANUAL_HOOK=y
+# end of KernelSU
+
 # end of Device Drivers
 
 #
