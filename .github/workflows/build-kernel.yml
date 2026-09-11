@@ -7,7 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Pinned to 22.04 on purpose: its apt clang is 14.  ubuntu-latest (24.04)
+    # ships clang 18, where -Wint-conversion is an error by default and a 5.4
+    # tree no longer builds cleanly.
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,7 +18,13 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y flex bison bc cpio libssl-dev xz-utils dwarves
+          sudo apt-get install -y flex bison bc cpio libssl-dev xz-utils dwarves clang lld llvm
+
+      - name: Show toolchain
+        run: |
+          clang --version
+          ld.lld --version
+          llvm-ar --version | head -1
 
       - name: Show kernel release
         run: |
