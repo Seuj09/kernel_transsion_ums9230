@@ -2025,7 +2025,15 @@ static bool tcp_tso_should_defer(struct sock *sk, struct sk_buff *skb,
 	/* If next ACK is likely to come too late,
 	 * ie in more than min(1ms, half srtt), do not defer.
 	 */
-	threshold = min(srtt_in_ns >> 1, NSEC_PER_MSEC);
+	/* SPRD: min() type-checks its arguments by comparing typeof(x) * with
+	 * typeof(y) *, and srtt_in_ns >> 1 (u64) against NSEC_PER_MSEC (long)
+	 * trips clang's -Wcompare-distinct-pointer-types.  That is only a
+	 * warning upstream, but this tree carries Unisoc's
+	 *    KBUILD_CFLAGS := -Wall -Werror -Wundef ...
+	 * in the top-level Makefile, so here it is fatal.  min_t(u64,) performs
+	 * the same unsigned comparison the macro already resolved to.
+	 */
+	threshold = min_t(u64, srtt_in_ns >> 1, NSEC_PER_MSEC);
 
 	if ((s64)(how_far_is_the_ack - threshold) > 0)
 		goto send_now;

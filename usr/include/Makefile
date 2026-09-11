@@ -12,6 +12,28 @@ UAPI_CFLAGS := -std=c90 -Wall -Werror=implicit-function-declaration
 # It is here just because CONFIG_CC_CAN_LINK is tested with -m32 or -m64.
 UAPI_CFLAGS += $(filter -m32 -m64 --target=%, $(KBUILD_CPPFLAGS) $(KBUILD_CFLAGS))
 
+# SPRD: this test is cross-compiled, because the line above propagates --target=
+# out of KBUILD_CPPFLAGS, but clang is not given a sysroot to match.  The
+# reference build never hit this: it ran inside the Android build system, where
+# build.config.common hands clang a Bionic sysroot.  Here the toolchain is the
+# bare AOSP prebuilt on a Debian host, so a UAPI header that includes a libc
+# header outside __KERNEL__ (linux/virtio_ring.h -> <stdint.h>,
+# linux/dvb/video.h -> <time.h>) lands on glibc's *host* headers, which
+# immediately need the multilib bits/ directory -- and clang, unlike gcc, does
+# not add /usr/include/<triple> to its search path.  Every such header dies on
+# 'bits/libc-header-start.h' or 'bits/wordsize.h'.
+#
+# Point the test at the cross libc headers (libc6-dev-arm64-cross) instead.
+# Guarded with a wildcard: on a toolchain that ships its own sysroot, or in a
+# native build with CROSS_COMPILE unset, this expands to nothing and the test
+# behaves exactly as upstream.
+ifneq ($(CROSS_COMPILE),)
+uapi_cross_include := $(firstword $(wildcard /usr/$(patsubst %-,%,$(CROSS_COMPILE))/include))
+endif
+ifneq ($(uapi_cross_include),)
+UAPI_CFLAGS += -isystem $(uapi_cross_include)
+endif
+
 override c_flags = $(UAPI_CFLAGS) -Wp,-MMD,$(depfile) -I$(objtree)/usr/include
 
 # The following are excluded for now because they fail to build.
@@ -63,14 +85,6 @@ header-test- += sound/asound.h
 header-test- += sound/compress_offload.h
 header-test- += sound/emu10k1.h
 header-test- += sound/sfnt_info.h
-# SPRD: the !__KERNEL__ branch includes <stdio.h> and <sys/ioctl.h>, so the
-# header is not self-contained.  The test compiles it with clang, which does
-# not search Debian/Ubuntu's multiarch include dir, and it dies on
-# 'bits/libc-header-start.h'.  Blacklisted rather than patched: <stdio.h> is
-# unused (only _IOW() is needed), but <sys/ioctl.h> is unavoidable, and the
-# header is consumed by userspace.  sound/asound.h above is blacklisted for
-# the same reason.
-header-test- += sound/sprd_audiodsp_ioctl.h
 header-test- += xen/evtchn.h
 header-test- += xen/gntdev.h
 header-test- += xen/privcmd.h
