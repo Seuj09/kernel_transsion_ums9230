@@ -7,10 +7,22 @@ on:
 
 jobs:
   build:
-    # Pinned to 22.04 on purpose: its apt clang is 14.  ubuntu-latest (24.04)
-    # ships clang 18, where -Wint-conversion is an error by default and a 5.4
-    # tree no longer builds cleanly.
     runs-on: ubuntu-22.04
+    env:
+      CLANG_DIR: ${{ runner.temp }}/clang-r416183b
+      # Mirror of what the vendor's own build config uses:
+      #
+      #   build.config.common : LLVM=1
+      #                         CLANG_PREBUILT_BIN=.../clang-r416183b/bin
+      #   build.config.aarch64: ARCH=arm64
+      #                         LLVM_IAS=1
+      #                         CROSS_COMPILE=aarch64-linux-gnu-
+      #
+      # The CROSS_COMPILE prefix is load-bearing: it is what supplies clang's
+      # target triple.  With ARCH=arm64 alone clang still compiles for the
+      # host, and the arm64 inline asm dies with
+      # "unknown register name 'x0' in asm" in asm/atomic_lse.h.
+      MAKE_ARGS: LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,7 +30,15 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y flex bison bc cpio libssl-dev xz-utils dwarves clang lld llvm
+          sudo apt-get install -y flex bison bc cpio libssl-dev xz-utils dwarves
+
+      - name: Fetch the reference toolchain (clang-r416183b)
+        run: |
+          curl -sSL -o /tmp/clang.tar.gz \
+            https://codeload.github.com/LineageOS/android_prebuilts_clang_kernel_linux-x86_clang-r416183b/tar.gz/refs/heads/lineage-20.0
+          mkdir -p "$CLANG_DIR"
+          tar xzf /tmp/clang.tar.gz -C "$CLANG_DIR" --strip-components=1
+          echo "$CLANG_DIR/bin" >> "$GITHUB_PATH"
 
       - name: Show toolchain
         run: |
@@ -28,12 +48,12 @@ jobs:
 
       - name: Show kernel release
         run: |
-          make ARCH=arm64 O=out bg6_defconfig >/dev/null
-          echo "kernelrelease: $(make ARCH=arm64 O=out -s kernelrelease)"
+          make $MAKE_ARGS bg6_defconfig
+          echo "kernelrelease: $(make $MAKE_ARGS -s kernelrelease)"
 
       - name: Build Image
         run: |
-          make LLVM=1 LLVM_IAS=1 ARCH=arm64 O=out -j$(nproc) Image
+          make $MAKE_ARGS -j$(nproc) Image
 
       - name: Compress Image with xz -9e
         run: |
