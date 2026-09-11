@@ -802,6 +802,8 @@ static __always_inline u32 bpf_prog_run_xdp(const struct bpf_prog *prog,
 	return BPF_PROG_RUN(prog, xdp);
 }
 
+void bpf_prog_change_xdp(struct bpf_prog *prev_prog, struct bpf_prog *prog);
+
 static inline u32 bpf_prog_insn_size(const struct bpf_prog *prog)
 {
 	return prog->len * sizeof(struct bpf_insn);

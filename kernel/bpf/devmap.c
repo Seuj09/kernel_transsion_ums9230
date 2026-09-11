@@ -691,6 +691,22 @@ static int dev_map_hash_update_elem(struct bpf_map *map, void *key, void *value,
 					 map, key, value, map_flags);
 }
 
+/* A devmap value larger than a bare ifindex means userspace asked for the
+ * per-entry program layout (struct bpf_devmap_val). Generic XDP cannot honour
+ * that, so generic_xdp_install() rejects such programs. This tree's devmap
+ * still only accepts value_size == 4, so the helper always answers "no" here;
+ * it is kept so the check matches the source this was ported from.
+ */
+bool dev_map_can_have_prog(struct bpf_map *map)
+{
+	if ((map->map_type == BPF_MAP_TYPE_DEVMAP ||
+	     map->map_type == BPF_MAP_TYPE_DEVMAP_HASH) &&
+	    map->value_size != offsetofend(struct bpf_devmap_val, ifindex))
+		return true;
+
+	return false;
+}
+
 const struct bpf_map_ops dev_map_ops = {
 	.map_alloc = dev_map_alloc,
 	.map_free = dev_map_free,

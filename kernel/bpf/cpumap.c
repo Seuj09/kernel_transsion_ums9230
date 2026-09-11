@@ -592,6 +592,16 @@ static int cpu_map_get_next_key(struct bpf_map *map, void *key, void *next_key)
 	return 0;
 }
 
+/* See the comment on dev_map_can_have_prog(): a cpumap value larger than a bare
+ * qsize means userspace asked for the per-entry program layout. Generic XDP
+ * cannot honour that; this tree's cpumap only accepts value_size == 4.
+ */
+bool cpu_map_prog_allowed(struct bpf_map *map)
+{
+	return map->map_type == BPF_MAP_TYPE_CPUMAP &&
+	       map->value_size != offsetofend(struct bpf_cpumap_val, qsize);
+}
+
 const struct bpf_map_ops cpu_map_ops = {
 	.map_alloc		= cpu_map_alloc,
 	.map_free		= cpu_map_free,

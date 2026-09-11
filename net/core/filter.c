@@ -9112,6 +9112,18 @@ const struct bpf_prog_ops sk_lookup_prog_ops = {
 };
 #endif /* CONFIG_INET */
 
+/* Upstream wires XDP execution through a BPF dispatcher (DEFINE_BPF_DISPATCHER(xdp))
+ * and uses this hook to register/unregister the active program with it. This tree
+ * deliberately does not instantiate the xdp dispatcher: its JITed jump table calls
+ * prog->bpf_func directly and so would bypass the ACK/Qualcomm call-target check in
+ * bpf_call_func(), which is what our bpf_prog_run_xdp() goes through. The dispatcher
+ * is a pure indirect-call optimization, so keeping the hook as a no-op preserves the
+ * observable behaviour while keeping the CFI check on the XDP path.
+ */
+void bpf_prog_change_xdp(struct bpf_prog *prev_prog, struct bpf_prog *prog)
+{
+}
+
 #ifdef CONFIG_DEBUG_INFO_BTF
 BTF_ID_LIST_GLOBAL(btf_sock_ids)
 #define BTF_SOCK_TYPE(name, type) BTF_ID(struct, type)

@@ -4114,7 +4114,7 @@ static int link_create(union bpf_attr *attr)
 		break;
 #ifdef CONFIG_NET
 	case BPF_PROG_TYPE_XDP:
-		ret = -EOPNOTSUPP;
+		ret = bpf_xdp_link_attach(attr, prog);
 		break;
 #endif
 	default:
