@@ -642,3 +642,9 @@ CONFIG_UBSAN_TRAP=y
 # CONFIG_UBSAN_MISC is not set
 CONFIG_CORESIGHT=y
 CONFIG_CORESIGHT_STM=y
+
+#
+# KernelSU
+#
+# CONFIG_KSU is not set
+# end of KernelSU

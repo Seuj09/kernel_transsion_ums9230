@@ -6267,3 +6267,9 @@ CONFIG_CORESIGHT_SOURCE_ETM4X=y
 CONFIG_CORESIGHT_STM=y
 # CONFIG_CORESIGHT_CPU_DEBUG is not set
 # end of Kernel hacking
+
+#
+# KernelSU
+#
+# CONFIG_KSU is not set
+# end of KernelSU

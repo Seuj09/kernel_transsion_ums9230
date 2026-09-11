@@ -236,5 +236,12 @@ source "drivers/trusty/Kconfig"
 
 source "drivers/nfc/Kconfig"
 
+# SPRD: KernelSU-Next's Kconfig declares `config KSU` with no dependencies and
+# `default y`, so this source line turns KernelSU on for *every* defconfig in
+# the tree at once, not just bg6.  bg6_defconfig selects it explicitly; every
+# other arch/arm64/configs/*_defconfig carries a matching
+# "# CONFIG_KSU is not set" so that the twelve unrelated board/product targets
+# this tree ships do not silently gain root support.  Add that same line to any
+# new defconfig that is not meant to carry KernelSU.
 source "drivers/kernelsu/Kconfig"
 endmenu
