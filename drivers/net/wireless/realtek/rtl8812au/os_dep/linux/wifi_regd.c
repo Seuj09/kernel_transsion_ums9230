@@ -413,7 +413,11 @@ static struct country_code_to_enum_rd *_rtw_regd_find_country(u16 countrycode)
 	return NULL;
 }
 
-int rtw_regd_init(struct wiphy *wiphy)
+/* Renamed from rtw_regd_init -- see the note on rtl8812au_sec_write_cam in
+ * hal/hal_com.c: rtw88 defines rtw_regd_init with a different signature and
+ * both drivers are built into this kernel.  Do not rename back.
+ */
+int rtl8812au_regd_init(struct wiphy *wiphy)
 {
 #if 0
 	if (rtw_regd == NULL) {
