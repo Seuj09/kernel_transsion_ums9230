@@ -6481,6 +6481,12 @@ CONFIG_ATH6KL_USB=y
 # --- USB WiFi adapters: MediaTek ---
 CONFIG_WLAN_VENDOR_MEDIATEK=y
 CONFIG_MT7601U=y
+# mt76 already carries its USB bus layer in this tree (usb.c,
+# mt76x02_usb_core.c) -- only the chip front-ends were switched off.
+# MT76x0U = MT7610U, MT76x2U = MT7612U; both depend only on MAC80211+USB.
+# The PCIe siblings (MT76x0E/MT76x2E) are pointless on a phone.
+CONFIG_MT76x0U=y
+CONFIG_MT76x2U=y
 
 # --- USB WiFi adapters: Ralink ---
 CONFIG_WLAN_VENDOR_RALINK=y
@@ -6502,6 +6508,12 @@ CONFIG_RTL_CARDS=y
 CONFIG_RTL8192CU=y
 CONFIG_RTL8XXXU=y
 CONFIG_RTL8XXXU_UNTESTED=y
+# rtl8812au/rtl8814au have NO mainline driver at all -- rtl8xxxu does not cover
+# them and rtw88 only covers 8821/8822/8723d.  These are the chips in Kali's own
+# recommended long-range adapters (Alfa AWUS036ACH = 8812au, AWUS1900 = 8814au),
+# so without this out-of-tree driver they simply do not work.  Built in (=y)
+# because this tree only ever produces an Image -- nothing installs modules.
+CONFIG_88XXAU=y
 
 # --- USB WiFi adapters: ZyDAS ---
 CONFIG_WLAN_VENDOR_ZYDAS=y

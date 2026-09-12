@@ -411,6 +411,13 @@ static const struct usb_device_id blacklist_table[] = {
 	{ USB_DEVICE(0x13d3, 0x3461), .driver_info = BTUSB_REALTEK },
 	{ USB_DEVICE(0x13d3, 0x3462), .driver_info = BTUSB_REALTEK },
 
+	/* TP-Link UB500 (RTL8761BU).  Mainline only gained these IDs around 5.16,
+	 * so on 5.4 the dongle is unclaimed and never binds.  This is the cheap
+	 * BT adapter NetHunter users actually buy, and is the reason the upstream
+	 * NetHunter builder carries add-ub500-to-btusb.patch.
+	 */
+	{ USB_DEVICE(0x2357, 0x0604), .driver_info = BTUSB_REALTEK },
+
 	/* Additional Realtek 8822BE Bluetooth devices */
 	{ USB_DEVICE(0x13d3, 0x3526), .driver_info = BTUSB_REALTEK },
 	{ USB_DEVICE(0x0b05, 0x185c), .driver_info = BTUSB_REALTEK },
