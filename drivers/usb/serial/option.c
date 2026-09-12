@@ -605,9 +605,16 @@ static void option_instat_callback(struct urb *urb);
 #define WETELECOM_PRODUCT_6802			0x6802
 #define WETELECOM_PRODUCT_WMD300		0x6803
 
-/* OPLUS products */
-#define OPLUS_VENDOR_ID				0x22d9
-#define OPLUS_PRODUCT_R11			0x276c
+/* OPPO products */
+/* Named OPLUS_* in the vendor drop, which is why this file did not compile:
+ * the device table at the bottom of the file references OPPO_VENDOR_ID and
+ * OPPO_PRODUCT_R11, and the rename here missed it.  Nothing else in the tree
+ * used the OPLUS_* spelling, and upstream calls these OPPO_*, so the defines
+ * move rather than the use -- that keeps the block diffable against mainline.
+ * Do not rename back.
+ */
+#define OPPO_VENDOR_ID				0x22d9
+#define OPPO_PRODUCT_R11			0x276c
 
 /* Sierra Wireless products */
 #define SIERRA_VENDOR_ID			0x1199
