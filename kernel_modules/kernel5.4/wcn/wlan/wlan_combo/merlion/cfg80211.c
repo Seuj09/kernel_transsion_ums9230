@@ -3726,7 +3726,7 @@ void sprdwl_setup_wiphy(struct wiphy *wiphy, struct sprdwl_priv *priv)
 	wiphy->interface_modes =
 	    BIT(NL80211_IFTYPE_STATION) | BIT(NL80211_IFTYPE_AP) |
 	    BIT(NL80211_IFTYPE_P2P_GO) | BIT(NL80211_IFTYPE_P2P_CLIENT) |
-	    BIT(NL80211_IFTYPE_P2P_DEVICE);
+	    BIT(NL80211_IFTYPE_P2P_DEVICE) | BIT(NL80211_IFTYPE_MONITOR);
 
 #if defined(IBSS_SUPPORT)
 	wiphy->interface_modes |= BIT(NL80211_IFTYPE_ADHOC);
@@ -3873,7 +3873,7 @@ void sprdwl_setup_wiphy(struct wiphy *wiphy, struct sprdwl_priv *priv)
 		    BIT(NL80211_IFTYPE_STATION) | BIT(NL80211_IFTYPE_AP) |
 		    BIT(NL80211_IFTYPE_P2P_CLIENT) |
 		    BIT(NL80211_IFTYPE_P2P_GO) |
-		    BIT(NL80211_IFTYPE_P2P_DEVICE);
+		    BIT(NL80211_IFTYPE_P2P_DEVICE) | BIT(NL80211_IFTYPE_MONITOR);
 	}
 
 	if (priv->fw_capa & SPRDWL_CAPA_ACL) {
