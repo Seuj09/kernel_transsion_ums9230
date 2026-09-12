@@ -6447,3 +6447,93 @@ CONFIG_CORESIGHT_STM=y
 # CONFIG_SPRD_SHARKL6PRO_CORESIGHT_PHY is not set
 # end of Coresight Physical Layer drivers
 # end of Kernel hacking
+
+#
+# NetHunter additions -- branch `nethunter` only.
+#
+# This block is the entire delta from the A17 bring-up kernel: bg6_defconfig is
+# shared with branch `a17-bpf`, and this block exists on `nethunter` alone.
+# Kconfig applies a defconfig in order and the last assignment wins, so the
+# entries below that flip an earlier `is not set` are deliberate re-sets.
+#
+# Scope note: ums9230 is Unisoc/Spreadtrum, not Qualcomm. NetHunter's 5.4
+# kernel patch (add-qcacld-3.0-injection-5.4.patch) targets Qualcomm's
+# qcacld-3.0 driver and does NOT apply here; the internal sprdwl WiFi is not
+# expected to do monitor mode or injection. Wireless injection therefore rides
+# on external USB adapters, which is why the vendor USB drivers below are the
+# substance of this change. Those are in-tree mac80211 drivers that support
+# injection natively once mac80211 is on -- no kernel patch is required.
+#
+
+# --- cfg80211 / mac80211 ---
+CONFIG_CFG80211_WEXT=y
+CONFIG_MAC80211_MESH=y
+CONFIG_MAC80211_LEDS=y
+CONFIG_MAC80211_DEBUGFS=y
+
+# --- USB WiFi adapters: Atheros ---
+CONFIG_WLAN_VENDOR_ATH=y
+CONFIG_ATH9K_HTC=y
+CONFIG_CARL9170=y
+CONFIG_ATH6KL=y
+CONFIG_ATH6KL_USB=y
+
+# --- USB WiFi adapters: MediaTek ---
+CONFIG_WLAN_VENDOR_MEDIATEK=y
+CONFIG_MT7601U=y
+
+# --- USB WiFi adapters: Ralink ---
+CONFIG_WLAN_VENDOR_RALINK=y
+CONFIG_RT2X00=y
+CONFIG_RT2500USB=y
+CONFIG_RT73USB=y
+CONFIG_RT2800USB=y
+CONFIG_RT2800USB_RT33XX=y
+CONFIG_RT2800USB_RT35XX=y
+CONFIG_RT2800USB_RT3573=y
+CONFIG_RT2800USB_RT53XX=y
+CONFIG_RT2800USB_RT55XX=y
+CONFIG_RT2800USB_UNKNOWN=y
+
+# --- USB WiFi adapters: Realtek ---
+CONFIG_WLAN_VENDOR_REALTEK=y
+CONFIG_RTL8187=y
+CONFIG_RTL_CARDS=y
+CONFIG_RTL8192CU=y
+CONFIG_RTL8XXXU=y
+CONFIG_RTL8XXXU_UNTESTED=y
+
+# --- USB WiFi adapters: ZyDAS ---
+CONFIG_WLAN_VENDOR_ZYDAS=y
+CONFIG_USB_ZD1201=y
+CONFIG_ZD1211RW=y
+
+# --- USB Bluetooth ---
+# The internal chip is UART-attached (BT_HCIUART / H4 / LL were already =y
+# above at line 1430-ish).  This adds the USB transport so an external BT
+# dongle works too -- the same reasoning as the USB WiFi adapters above, and
+# the reason NetHunter carries add-ub500-to-btusb.patch for other kernels.
+# Explicitly disabled at line 1434.
+CONFIG_BT_HCIBTUSB=y
+
+# --- USB network ---
+CONFIG_USB_NET_RNDIS_WLAN=y
+CONFIG_USB_RTL8150=y
+
+# --- NFC: internal NXP controller plus generic readers ---
+# The internal controller is a PN557 and already covered by CONFIG_NFC_PN557=m
+# at line 1500 -- that vendor driver is standalone (its Kconfig declares no
+# dependencies at all), which is why "NFC is not set" was harmless before.
+# NFC_NCI is the generic NCI protocol layer and has `default n` with nothing
+# selecting it, so the two NFC_NXP_NCI lines below are inert without it.
+CONFIG_NFC=y
+CONFIG_NFC_DIGITAL=y
+CONFIG_NFC_NCI=y
+CONFIG_NFC_NXP_NCI=y
+CONFIG_NFC_NXP_NCI_I2C=y
+CONFIG_NFC_PN533=y
+CONFIG_NFC_PN533_USB=y
+
+#
+# end of NetHunter additions
+#
