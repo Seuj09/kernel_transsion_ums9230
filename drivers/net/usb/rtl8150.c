@@ -698,7 +698,15 @@ static netdev_tx_t rtl8150_start_xmit(struct sk_buff *skb,
 	int count, res;
 
 	/* pad the frame and ensure terminating USB packet, datasheet 9.2.3 */
-	count = max(skb->len, ETH_ZLEN);
+	/* SPRD: max() type-checks its arguments by comparing typeof(x) * with
+	 * typeof(y) *, and skb->len (unsigned int) against ETH_ZLEN (int) makes
+	 * clang emit -Wcompare-distinct-pointer-types.  Upstream only warns, but
+	 * this tree carries a global -Werror (the vendor's first hunk against the
+	 * top-level Makefile), so the warning is fatal here.  max_t() performs the
+	 * same comparison the macro already resolved to.  Only reachable now that
+	 * CONFIG_USB_RTL8150 is enabled; it was never built before.
+	 */
+	count = max_t(unsigned int, skb->len, ETH_ZLEN);
 	if (count % 64 == 0)
 		count++;
 	if (skb_padto(skb, count)) {
