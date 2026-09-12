@@ -1,4 +1,4 @@
-name: Build Kernel
+name: Kernel CI
 
 on:
   workflow_dispatch:
@@ -25,6 +25,7 @@ jobs:
       # host, and the arm64 inline asm dies with
       # "unknown register name 'x0' in asm" in asm/atomic_lse.h.
       MAKE_ARGS: LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- O=out
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -103,14 +104,40 @@ jobs:
         run: |
           make $MAKE_ARGS -j$(nproc) Image
 
+      # --- NEW: build loadable modules (.ko) alongside the Image ---
+      # CONFIG_SPRD_WLAN=m (and anything else set to =m in the defconfig)
+      # only gets compiled if `make modules` is run explicitly — building
+      # just `Image` above skips all of these silently. Without this step,
+      # any change to an out-of-tree/modular driver (e.g. the WLAN combo
+      # driver) never actually reaches a flashed device, no matter how the
+      # source is edited, since the .ko already sitting on vendor_dlkm
+      # never gets rebuilt or replaced.
+      - name: Build modules
+        run: |
+          make $MAKE_ARGS -j$(nproc) modules
+
+      - name: Stage modules for packaging
+        run: |
+          mkdir -p out_modules
+          find out/ -name "*.ko" -exec cp {} out_modules/ \;
+          echo "Modules built:"
+          ls -la out_modules/
+
       - name: Compress Image with xz -9e
         run: |
           xz -9e -k -c out/arch/arm64/boot/Image > out/arch/arm64/boot/Image.xz
           ls -lh out/arch/arm64/boot/Image out/arch/arm64/boot/Image.xz
 
-      - name: Upload build output
+      - name: Upload Image artifact
         uses: actions/upload-artifact@v4
         with:
           name: kernel-Image-${{ github.sha }}
           path: out/arch/arm64/boot/Image.xz
+          if-no-files-found: warn
+
+      - name: Upload modules artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-modules-${{ github.sha }}
+          path: out_modules/*.ko
           if-no-files-found: warn
