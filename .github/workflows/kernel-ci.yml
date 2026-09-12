@@ -1,4 +1,4 @@
-name: Build Kernel
+name: Kernel CI
 
 on:
   workflow_dispatch:
