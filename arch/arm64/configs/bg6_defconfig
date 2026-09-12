@@ -6466,7 +6466,32 @@ CONFIG_CORESIGHT_STM=y
 #
 
 # --- cfg80211 / mac80211 ---
-CONFIG_CFG80211_WEXT=y
+#
+# DO NOT SET CONFIG_CFG80211_WEXT=y HERE.  It looks harmless -- it only adds
+# the legacy wireless-extensions compat layer -- but it changes the LAYOUT of
+# `struct wireless_dev' (see the #ifdef CONFIG_CFG80211_WEXT block in
+# include/net/cfg80211.h), and the internal WiFi driver embeds that struct BY
+# VALUE:
+#
+#     struct sprd_vif { ... struct wireless_dev wdev; ... }
+#     drivers/unisoc_platform/wlan/sc2355/scan.c:
+#         container_of(request->wdev, struct sprd_vif, wdev)
+#
+# The internal WiFi is CONFIG_SPRD_WLAN=m, i.e. a *prebuilt, signed* module on
+# the vendor partition -- we build only Image and can never rebuild it.  It was
+# compiled against the stock config, and BOTH vendor configs in this tree
+# (arch/arm64/configs/bg6_defconfig and bg6-stock_defconfig) leave WEXT off.
+# So turning WEXT on makes our cfg80211 write cqm_config / pmsr_list /
+# pmsr_free_wk at offsets the module does not share, corrupting sprd_vif --
+# and it fails silently, because the module is still trusted (vendor cert),
+# check_version() ignores CRC mismatches, and vermagic matches.  Symptom:
+# WiFi toggles on but a scan returns nothing.
+#
+# Nothing in the tree needs the compat layer: no driver we enable calls
+# cfg80211_wext_* (only net/wireless/wext-compat.c itself defines them), and
+# the out-of-tree Realtek driver implements its own WEXT ioctls rather than
+# using cfg80211's.  Restated explicitly so the last assignment wins.
+# CONFIG_CFG80211_WEXT is not set
 CONFIG_MAC80211_MESH=y
 CONFIG_MAC80211_LEDS=y
 CONFIG_MAC80211_DEBUGFS=y
