@@ -6576,6 +6576,41 @@ CONFIG_NFC_NXP_NCI_I2C=y
 CONFIG_NFC_PN533=y
 CONFIG_NFC_PN533_USB=y
 
+# --- USB serial adapters, host side: GPS receivers, 3G/4G sticks, USB-UART ---
+# Nothing in this block is demanded by Kali's builder: its build.sh sets no
+# CONFIG_* symbol at all (the only CONFIG_ string in it is CONFIG_TOOL) and it
+# expects the porter to supply a nethunter_defconfig, so the feature set is the
+# porting guide's prose.  USB serial is on that list -- NetHunter's wardriving
+# story is GPS over USB into gpsd/kismet, its cellular story is a 3G/4G stick,
+# and these four bridges cover virtually every USB-UART cable made.
+# CONFIG_USB_ACM=y (line 4002) already covers CDC-ACM modems; vendor-specific
+# ones need the option driver.
+CONFIG_USB_SERIAL=y
+CONFIG_USB_SERIAL_OPTION=y
+CONFIG_USB_SERIAL_FTDI_SIO=y
+CONFIG_USB_SERIAL_PL2303=y
+CONFIG_USB_SERIAL_CP210X=y
+CONFIG_USB_SERIAL_CH341=y
+
+# --- USB gadget: CDC-ACM serial function ---
+# USB_CONFIGFS_SERIAL=y (line 4181) is the *generic* serial function, which
+# needs a vendor driver on the host side.  CDC-ACM is the one a host recognises
+# on its own (/dev/ttyACM0, a COM port), which is what a serial console or a
+# reverse shell over USB wants.  RNDIS stays off here on purpose: the vendor
+# ships its own CONFIG_SPRD_USB_CONFIGFS_RNDIS=m for that.
+CONFIG_USB_CONFIGFS_ACM=y
+
+# --- USB ethernet: SMSC ---
+# The LAN95xx silicon in most cheap USB ethernet dongles.  AX88179/AX8817X,
+# CDC ethernet and RNDIS host are already on; AX88179 is =m.
+CONFIG_USB_NET_SMSC95XX=y
+
+# --- ISO 9660 ---
+# To loop-mount an ISO image on the phone itself.  Presenting one to a host as
+# a CD-ROM needs no filesystem at all -- that is mass storage with the cdrom
+# attribute, which USB_CONFIGFS_MASS_STORAGE=y (line 4189) already provides.
+CONFIG_ISO9660_FS=y
+
 #
 # end of NetHunter additions
 #
