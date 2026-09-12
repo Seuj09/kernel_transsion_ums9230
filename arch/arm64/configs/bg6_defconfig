@@ -6515,6 +6515,36 @@ CONFIG_RTL8XXXU_UNTESTED=y
 # because this tree only ever produces an Image -- nothing installs modules.
 CONFIG_88XXAU=y
 
+# rtw88 -- replaced wholesale with lwfinger's out-of-tree tree (the builder's
+# 4.14/add-rtw88-drivers-4.14.patch).  The in-tree rtw88 in 5.4 is PCI-only and
+# lacks the 8821c/8723d families entirely, so on a phone it can never bind to
+# anything, and the USB bus layer it needs does not exist in 5.4 at all.  The
+# replacement is a *replacement* -- same directory, same RTW88_* Kconfig
+# symbols, same C symbols, so the two cannot coexist -- but nothing is lost,
+# because the in-tree driver was never enabled here: out/.config carried
+# "# CONFIG_RTW88 is not set" and bg6_defconfig had no RTW88 line at all.
+#
+# Only the USB front-ends that 88XXAU above does NOT already claim are on.
+# rtw88 also carries 8812au/8814au/8821au front-ends and those WOULD collide:
+# rtw88_8812au.c claims 0x8812 plus ~35 vendor IDs that 88XXAU claims too, and
+# with both built in (=y) the winner is decided by link order, not by anything
+# meaningful.  88XXAU is the aircrack-ng driver NetHunter's own builder uses for
+# those chips, so it keeps them and rtw88 stays off them.
+#
+# PCI and SDIO front-ends stay off.  A phone has no PCIe or SDIO Realtek slot,
+# and with no front-end selected rtw88_pci.o / rtw88_sdio.o are not compiled at
+# all -- RTW88_PCI and RTW88_SDIO are unselected tristates, so this costs
+# nothing and needs no explicit "is not set".
+CONFIG_RTW88=y
+CONFIG_RTW88_USB=y
+CONFIG_RTW88_8822BU=y
+CONFIG_RTW88_8822CU=y
+CONFIG_RTW88_8723DU=y
+CONFIG_RTW88_8821CU=y
+# CONFIG_RTW88_8812AU is not set
+# CONFIG_RTW88_8814AU is not set
+# CONFIG_RTW88_8821AU is not set
+
 # --- USB WiFi adapters: ZyDAS ---
 CONFIG_WLAN_VENDOR_ZYDAS=y
 CONFIG_USB_ZD1201=y
